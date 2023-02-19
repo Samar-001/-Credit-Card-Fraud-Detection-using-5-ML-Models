@@ -1,6 +1,6 @@
 # SAMPLING: Credit Card Fraud Detection
-## Using 4 sampling methods to predict the result with the help of 5 ML models
-### _Sampling Methods used: Random, Systematic, Stratified, Clustered_
+## Using 5 sampling methods to predict the result with the help of 5 ML models
+### _Sampling Methods used: Random, Systematic, Stratified, Clustered, Weighted_
 ### _ML Models used: Logistic Regression, Decision Trees, Random Forest, Naive Bayes, K-Nearest Neighbor_
 
 <br>
@@ -77,16 +77,28 @@ stratified_df = df.groupby('AmountGroup', group_keys=False).apply(lambda x: x.sa
 
 #### Cluster Sampling
 ```Python
-K = int(len(df)/rows_per_cluster)
-data = None
-for k in range(K):
-    sample_k = df.sample(rows_per_cluster)
-    sample_k["Cluster"] = np.repeat(k,len(sample_k))
-    df = df.drop(index = sample_k.index)
-    data = pd.concat([data,sample_k],axis = 0)
-    
-random_clusters = np.random.randint(0,K,size = no_of_clusters)
-clustered_df = data[data.Cluster.isin(random_clusters)]
+def clustered_Sample(df, rows_per_cluster, no_of_clusters):
+    K = int(len(df)/rows_per_cluster)
+    cl_data = None
+    for k in range(K):
+        sample_cl = df.sample(rows_per_cluster)
+        sample_cl["Cluster"] = np.repeat(k,len(sample_cl))
+        df = df.drop(index = sample_cl.index)
+        cl_data = pd.concat([cl_data,sample_cl],axis = 0)
+
+    random_clusters = np.random.randint(0,K,size = no_of_clusters)
+    samples = cl_data[cl_data.Cluster.isin(random_clusters)]
+    return(samples)
+
+clustered_df = clustered_Sample(df = df, rows_per_cluster = 96, no_of_clusters = 4)
+```
+
+<br>
+
+#### Weighted Sampling
+```Python
+df['weights'] = df['AmountGroup'].map({0: 20, 1: 60, 2: 20})
+weighted_df = df.sample(n=382, weights='weights')
 ```
 
 <br>
@@ -135,16 +147,17 @@ accuracy_table['Random Sampling'] = random_accuracy
 accuracy_table['Systematic Sampling'] = systematic_accuracy
 accuracy_table['Stratified Sampling'] = stratified_accuracy
 accuracy_table['Clustered Sampling'] = clustered_accuracy
+accuracy_table['Weighted Sampling'] = weighted_accuracy
 ```
 
-We recieved the following table comparing accuracies of all five ML models applied on all four samples created using various sampling methods.
+We recieved the following table comparing accuracies of all five ML models applied on all five samples created using various sampling methods.
 
-Model\Sample | Random Sampling | Systematic Sampling | Stratified Sampling | Clustered Sampling
------------- | ------------- | ------------ | ------------- | -------------
-Logistic Regression |	0.916776 |	0.932503 |	0.911533 |	0.939056
-Decision Trees	 |	0.966579 |	0.959371 |	0.967890 |	0.963303
-Random Forest |	0.994758 |	**0.996068** |	0.990826 |	0.992136
-Naive Bayes |	0.872870 |	0.779817 |	0.807339 |	0.874181
-K-Nearest Neighbor	 |	0.899083 |	0.904325 |	0.904325 |	0.914155
+Model\Sample        | Random Sampling | Systematic Sampling | Stratified Sampling | Clustered Sampling | Weighted Sampling
+------------------- | --------------- | ------------------- | ------------------- | ------------------ | -----------------
+Logistic Regression |  0.916776	      |  0.932503           |  0.925950           |  0.918087          |  0.893840
+Decision Trees      |  0.967235	      |  0.963958           |  0.971166           |  0.967235          |  0.945609
+Random Forest       |**0.993447**     |  0.991481           |  0.992136           |  0.990826          |  0.992136
+Naive Bayes         |  0.872870	      |  0.779817           |  0.816514           |  0.828309          |  0.838794
+K-Nearest Neighbor  |  0.899083	      |  0.904325           |  0.918087           |  0.917431          |  0.908257
 
-From the table, it is evident that highest accuracy has been achieved using Random Forest classifier on Systematic sample. Although the results may vary everytime you run the code.
+From the table, it is evident that highest accuracy has been achieved using `Random Forest Classifier` on `Random Sample`. Although the results may vary everytime you run the code.
