@@ -93,8 +93,6 @@ def clustered_Sample(df, rows_per_cluster, no_of_clusters):
 clustered_df = clustered_Sample(df = df, rows_per_cluster = 96, no_of_clusters = 4)
 ```
 
-<br>
-
 #### Weighted Sampling
 ```Python
 df['weights'] = df['AmountGroup'].map({0: 20, 1: 60, 2: 20})
